@@ -1,11 +1,112 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Base from "../layouts/Base.astro";
+import ItemCard from "../components/ItemCard.astro";
+import { getCollection } from "astro:content";
+import ResearchList from "../components/ResearchList.astro";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+
+
+const news = (await getCollection("news")).sort((a,b)=> b.data.date.localeCompare(a.data.date));
+const research = (await getCollection("research")).sort((a,b)=> b.data.year - a.data.year);
+const teaching = await getCollection("teaching");
+const misc = await getCollection("misc");
 ---
+<Base title="Kevin Hernandez — HCI / AI & Society">
+  <!-- ABOUT (card + data-section so the nav highlighter sees it if you want) -->
+<section id="about" data-section class="card">
+  <div class="hero">
+    <figure class="hero-figure">
+      <div class="hero-crop">
+        <img
+          class="hero-img"
+          src="/images/kevin-portrait.png"
+          alt="Kevin Hernandez portrait"
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+    </figure>
 
-<Layout>
-	<Welcome />
-</Layout>
+    <div class="hero-text">
+      <!-- big title now lives here, not in the sticky nav -->
+      <h1 class="hero-title">
+        <span class="hero-emoji">🍑</span> Kevin Hernandez <span class="kicker">(he/him)</span>
+      </h1>
+
+      <p>
+        Hi, I’m a researcher focused on <span class="hl">human–computer interaction</span> and
+        <span class="hl">social computing</span>. I study how youth build
+        <span class="hl">critical AI literacy</span> and techno-social change agency to shape AI’s
+        design and governance.
+      </p>
+
+      <p>
+        I design <span class="hl">productivity &amp; creativity support tools</span> and
+        community-centered interventions that reduce cognitive load, support diverse exploration,
+        and integrate into real workflows.
+      </p>
+
+      <div class="hero-links">
+        <a class="hero-chip" href="mailto:kh78@rice.edu">✉️ kh78@rice.edu</a>
+        <a class="hero-chip" href="https://www.linkedin.com/in/kevin-hernandez03/" target="_blank" rel="noreferrer">🔗 LinkedIn</a>
+        <a class="hero-chip" href="/cv">📄 Full CV</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  <!-- NEWS -->
+  <section id="news" data-section>
+    <h2 class="h2">News</h2>
+    <div class="grid">
+      {news.map(n => (
+        <ItemCard
+          title={n.data.title}
+          subtitle={new Date(n.data.date).toDateString()}
+          chips={n.data.tags}
+          links={n.data.link ? [{label:"link", url:n.data.link}] : []}
+          teaser={n.body}
+        />
+      ))}
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section id="research" data-section>
+    <h2 class="h2">Research</h2>
+    <ResearchList items={research} />
+  </section>
+
+
+  <!-- TEACHING -->
+  <section id="teaching" data-section>
+    <h2 class="h2">Teaching & Mentoring</h2>
+    <div class="grid">
+      {teaching.map(t => (
+        <ItemCard
+          title={t.data.course}
+          subtitle={[t.data.term, t.data.role, t.data.with].filter(Boolean).join(" · ")}
+          links={t.data.links}
+          teaser={t.body}
+        />
+      ))}
+    </div>
+  </section>
+
+  <!-- MISC -->
+  <section id="misc" data-section>
+    <h2 class="h2">Misc</h2>
+    <div class="grid">
+      {misc.map(m => (
+        <ItemCard
+          title={m.data.title}
+          subtitle={m.data.date || ""}
+          links={m.data.link ? [{label:"link", url:m.data.link}] : []}
+          teaser={m.data.note || m.body}
+        />
+      ))}
+    </div>
+  </section>
+</Base>

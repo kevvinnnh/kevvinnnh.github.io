@@ -1,0 +1,83 @@
+---
+interface Author { name: string; url?: string; me?: boolean }
+interface Res { type: string; url: string; label?: string }
+interface Props {
+  emoji?: string;
+  gif?: string;          
+  title: string;
+  authors: Author[];
+  venue?: string;
+  year?: number;
+  status?: string;
+  teaser?: string;
+  thumbnail?: string;
+  resources?: Res[];
+}
+const p = Astro.props as Props;
+
+
+// map resource types to emojis + default labels
+const RES_META: Record<string,{emoji:string, label:string}> = {
+  pdf:{emoji:"📄", label:"PDF"},
+  video:{emoji:"🎥", label:"Video"},
+  project:{emoji:"🔗", label:"Project"},
+  code:{emoji:"💻", label:"Code"},
+  tweetorial:{emoji:"🧵", label:"Tweetorial"},
+  demo:{emoji:"🧪", label:"Demo"},
+  bibtex:{emoji:"🧾", label:"BibTeX"},
+  slides:{emoji:"🖼️", label:"Slides"},
+  data:{emoji:"📊", label:"Data"},
+};
+
+
+function gifSrc(input?: string) {
+  if (!input) return undefined;
+  if (/^https?:\/\//.test(input)) return input;
+  const base = import.meta.env.BASE_URL || '/';
+  return `${base}${input.replace(/^\/+/, '')}`; // prefixes repo base if needed
+}
+
+function renderAuthors(list: Author[]) {
+  const parts = list.map((a) => {
+    const name = a.me ? `<b>${a.name}</b>` : a.name;
+    return a.url ? `<a href="${a.url}" target="_blank" rel="noreferrer">${name}</a>` : name;
+  });
+  // Oxford-comma join
+  if (parts.length <= 2) return parts.join(", ");
+  return parts.slice(0,-1).join(", ") + ", " + parts.slice(-1)[0];
+}
+---
+<article class="pub">
+  <div class="pub-thumb">
+    {p.thumbnail ? <img src={p.thumbnail} alt="" loading="lazy" /> : <div class="thumb-placeholder">🖼️</div>}
+  </div>
+  <div class="pub-body">
+    <h3 class="pub-title">
+      {gifSrc(p.gif) && (
+        <img class="pub-gif" src={gifSrc(p.gif)} alt="" aria-hidden="true" loading="lazy" />
+      )}
+      <span>{p.title}</span>
+    </h3>
+
+    <div class="pub-authors" set:html={renderAuthors(p.authors)} />
+
+    <div class="pub-meta">
+      {[p.venue, p.year?.toString(), p.status].filter(Boolean).join(" · ")}
+      {p.teaser && <span class="sep"> // </span>}
+      {p.teaser}
+    </div>
+
+    {p.resources && p.resources.length > 0 && (
+      <div class="pub-res">
+        {p.resources.map((r) => {
+          const meta = RES_META[r.type] ?? {emoji:"🔗", label:r.type};
+          return (
+            <a class="res-chip" href={r.url} target="_blank" rel="noreferrer" data-emoji={meta.emoji}>
+              {r.label ?? meta.label}
+            </a>
+          );
+        })}
+      </div>
+    )}
+  </div>
+</article>

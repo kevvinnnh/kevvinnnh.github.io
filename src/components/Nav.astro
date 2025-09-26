@@ -1,0 +1,73 @@
+---
+const tabs = [
+  { href: '#news',     label:'News' },
+  { href: '#research', label:'Research' },
+  { href: '#teaching', label:'Teaching' },
+  { href: '#misc',     label:'Misc' },
+];
+
+const base = import.meta.env.BASE_URL || '/';
+const here = Astro.url.pathname;
+const hrefFor = (hash: string) => (here === base ? hash : `${base}${hash.replace(/^#/, '#')}`);
+---
+<header class="sticky">
+  <div class="container header">
+    <!-- Brand (clicking goes home) -->
+    <a class="brand" href={base} aria-label="Go to home">🍑 Kevin Hernandez</a>
+
+    <!-- Desktop links -->
+    <nav class="nav nav-desktop">
+      {tabs.map(t => <a href={hrefFor(t.href)}>{t.label}</a>)}
+    </nav>
+
+    <!-- Mobile burger -->
+    <button class="burger" aria-label="Open menu" aria-controls="drawer" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Backdrop + Drawer (mobile) -->
+  <div id="backdrop" class="backdrop" hidden></div>
+  <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="Site navigation" inert>
+    <div class="drawer-head">
+      <span class="brand-mini">🍑 Kevin Hernandez</span>
+      <button class="drawer-close" aria-label="Close menu">✕</button>
+    </div>
+    <nav class="drawer-nav">
+      {tabs.map(t => <a href={hrefFor(t.href)} class="drawer-link">{t.label}</a>)}
+    </nav>
+  </aside>
+</header>
+
+
+
+<script>
+  const burger   = document.querySelector('.burger');
+  const drawer   = document.getElementById('drawer');
+  const backdrop = document.getElementById('backdrop');
+  const closeBtn = document.querySelector('.drawer-close');
+
+  function openNav(){
+    drawer.classList.add('open');
+    backdrop.hidden = false;
+    burger.setAttribute('aria-expanded','true');
+    drawer.removeAttribute('inert');
+    document.body.classList.add('no-scroll');
+    // focus first link
+    const first = drawer.querySelector('a'); first && first.focus();
+  }
+  function closeNav(){
+    drawer.classList.remove('open');
+    backdrop.hidden = true;
+    burger.setAttribute('aria-expanded','false');
+    drawer.setAttribute('inert','');
+    document.body.classList.remove('no-scroll');
+    burger.focus();
+  }
+
+  burger.addEventListener('click', openNav);
+  backdrop.addEventListener('click', closeNav);
+  closeBtn.addEventListener('click', closeNav);
+  drawer.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeNav(); });
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav));
+</script>

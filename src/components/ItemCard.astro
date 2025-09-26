@@ -1,0 +1,20 @@
+---
+interface Props {
+  title: string; subtitle?: string; chips?: string[];
+  links?: {label:string; url:string}[];
+  teaser?: string; thumb?: string;
+}
+const { title, subtitle, chips = [], links = [], teaser, thumb } = Astro.props as Props;
+---
+<article class="card grid" style="grid-template-columns: 120px 1fr">
+  {thumb ? <img src={thumb} alt="" style="width:120px;height:90px;object-fit:cover;border-radius:8px" /> : <div></div>}
+  <div>
+    <div class="h2" style="margin:0">{title}</div>
+    {subtitle && <div class="kicker" style="margin-bottom:6px">{subtitle}</div>}
+    {teaser && <p style="margin:8px 0">{teaser}</p>}
+    <div>{chips.map(c => <span class="tag">{c}</span>)}</div>
+    <div style="margin-top:8px;display:flex;gap:12px">
+      {links.map(l => <a href={l.url} target="_blank" rel="noreferrer">{l.label}</a>)}
+    </div>
+  </div>
+</article>

@@ -1,0 +1,17 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import ItemCard from "../components/ItemCard.astro";
+const items = (await getCollection("news"))
+  .sort((a,b)=> b.data.date.localeCompare(a.data.date));
+---
+<Base title="News — Kevin Hernandez">
+  <h2 class="h2">News</h2>
+  <div class="grid">{items.map(n => (
+    <ItemCard title={n.data.title}
+              subtitle={new Date(n.data.date).toDateString()}
+              chips={n.data.tags}
+              links={n.data.link ? [{label:"link", url:n.data.link}] : []}
+              teaser={n.body} />
+  ))}</div>
+</Base>

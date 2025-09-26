@@ -1,0 +1,70 @@
+---
+import "../styles/theme.css";
+import Nav from "../components/Nav.astro";
+const { title = "Kevin Hernandez" } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <Nav />
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="container">
+      <div id="wxline">
+        <span id="wxplace">Stanford University</span> 🌲 <span id="wxtext">loading…</span> ·
+        <span id="lu"></span>
+      </div>
+      <div class="kicker">Twitter · GitHub · LinkedIn · Google Scholar</div>
+    </footer>
+
+
+<script type="module">
+  // --- CONFIG: Stanford coords ---
+  const coords = { lat: 37.4275, lon: -122.1697 }; // Stanford University
+
+  // Build URL (Open-Meteo; no key required)
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,weather_code,is_day&timezone=auto`;
+
+  const wxText = document.getElementById('wxtext');
+  const lu = document.getElementById('lu');
+
+  // Map Open-Meteo weather codes to short text
+  function wxLabel(code, isDay) {
+    const m = new Map([
+      [0, isDay ? 'sunny' : 'clear'],
+      [1, 'mostly clear'], [2, 'partly cloudy'], [3, 'overcast'],
+      [45, 'foggy'], [48, 'freezing fog'],
+      [51, 'light drizzle'], [53, 'drizzle'], [55, 'heavy drizzle'],
+      [56, 'freezing drizzle'], [57, 'freezing drizzle'],
+      [61, 'light rain'], [63, 'rainy'], [65, 'heavy rain'],
+      [66, 'freezing rain'], [67, 'freezing rain'],
+      [71, 'light snow'], [73, 'snow'], [75, 'heavy snow'],
+      [77, 'snow grains'],
+      [80, 'rain showers'], [81, 'rain showers'], [82, 'heavy showers'],
+      [85, 'snow showers'], [86, 'heavy snow showers'],
+      [95, 'thunderstorms'], [96, 'hail & storms'], [99, 'hail & storms'],
+    ]);
+    return m.get(code) ?? 'variable';
+  }
+
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    const data = await res.json();
+    const cur = data.current;
+    const label = wxLabel(cur.weather_code, !!cur.is_day);
+    const temp = Math.round(cur.temperature_2m);
+    wxText.textContent = `is ${label} ${temp}°`;
+  } catch (e) {
+    wxText.textContent = 'weather unavailable';
+  }
+
+  lu.textContent = new Date().toLocaleDateString();
+</script>
+  </body>
+</html>

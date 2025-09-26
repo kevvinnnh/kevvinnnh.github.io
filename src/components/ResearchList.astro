@@ -1,0 +1,25 @@
+---
+import ResearchItem from "./ResearchItem.astro";
+import type { CollectionEntry } from "astro:content";
+const { items } = Astro.props as { items: CollectionEntry<"research">[] };
+
+const sorted = items
+  .slice()
+  .sort((a,b) => (b.data.pinned?1:0) - (a.data.pinned?1:0) || (b.data.year - a.data.year));
+---
+<div class="pub-list">
+  {sorted.map(({ data }) => (
+    <ResearchItem
+      gif={data.gif}
+      emoji={data.emoji}
+      title={data.title}
+      authors={data.authors}
+      venue={data.venue}
+      year={data.year}
+      status={data.status}
+      teaser={data.teaser}
+      thumbnail={data.thumbnail}
+      resources={data.resources}
+    />
+  ))}
+</div>

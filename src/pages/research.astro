@@ -1,0 +1,33 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import ItemCard from "../components/ItemCard.astro";
+
+const items = (await getCollection("research"))
+  .sort((a,b)=> b.data.year - a.data.year);
+---
+<Base title="Research — Kevin Hernandez">
+  <h2 class="h2">Research</h2>
+  <div class="grid">
+    {items.map(r => (
+      <ItemCard
+        title={r.data.title}
+        subtitle={[r.data.authors, r.data.venue, r.data.year].filter(Boolean).join(" · ")}
+        chips={[r.data.status]}
+        links={[
+          ...(r.data.pdf ? [{label:"PDF", url:r.data.pdf}] : []),
+          ...(r.data.projectPage ? [{label:"Project", url:r.data.projectPage}] : []),
+          ...(r.data.code ? [{label:"Code", url:r.data.code}] : []),
+          ...(r.data.video ? [{label:"Video", url:r.data.video}] : []),
+        ]}
+        teaser={r.data.teaser}
+        thumb={r.data.thumbnail}
+      />
+    ))}
+  </div>
+</Base>
+
+---
+export const prerender = true;
+return Astro.redirect('../#research');
+---
